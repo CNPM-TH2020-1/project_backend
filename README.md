@@ -1,3 +1,4 @@
+```
 │   .gitignore
 │   app.js
 │   package-lock.json
@@ -20,3 +21,4 @@
 ├───routes
 │       movie.route.js
 │       user.route.js
+```
