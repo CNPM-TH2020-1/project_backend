@@ -6,5 +6,7 @@ router.post("/create", savingControl.create)
 router.get("/savingdetail", savingControl.getById)
 router.patch("/deposit", savingControl.UserDeposit)
 router.patch("/withdraw", savingControl.UserWithdraw)
+router.get("/reportbyMonth", savingControl.MonthlyReport)
+router.get("/reportbyDay", savingControl.DailyReport)
 
 module.exports = router
