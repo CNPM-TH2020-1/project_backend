@@ -1,14 +1,9 @@
 const express = require("express")
 const app = express()
-const db = require("./db/db")
 const { engine } = require("express-handlebars")
-const userRoute = require("./routes/user.route")
-const movieRoute = require("./routes/movie.route")
+const savingRoute = require("./routes/saving.route")
 const auth = require("./middlewares/authorization")
 const session = require("express-session")
-
-const movieModel = require("./models/movie.model")
-const userModel = require("./models/user.model")
 
 // config view
 app.engine("hbs", engine({
@@ -36,15 +31,10 @@ app.use(session({
 }))
 
 // ROUTES
-app.use("/user", userRoute)
-app.use("/home", auth.auth, movieRoute)
+//app.use("/user", userRoute)
+app.use("/saving", savingRoute)
 
-app.listen(20621, () => {
-  console.log("App listened to port 20621")
-  // userModel.createUser({
-  //   username: "tuyendeptrai",
-  //   password: "123"
-  // })
-  //   .then(data => {console.log(data)})
+app.listen(4000, () => {
+  console.log("App listened to port 4000")
 })
 
