@@ -13,7 +13,7 @@ module.exports = {
     var newSaving = req.body;
     const date = new Date().toISOString().split('T')[0]
     newSaving.createAt = date
-    newSaving.status = true
+    newSaving.status = { "isClosed": false, "closeAt": "" }
     savingData.createSaving(newSaving)
       .then(() => {
         res.send("Tao so tiet kiem thanh cong.")
@@ -45,9 +45,8 @@ module.exports = {
     else{
       savingData.findSavingbyID(req.body._id)
         .then((saving) => {
-          console.log(saving)
           if (saving.status){
-            savingData.createDepoInvoice(saving.Type, money, "deposit")
+            savingData.createDepoInvoice(saving.Type, money, saving.CCCD)
             savingData.deposit(req.body._id, money)
               .then((data) => {
                 res.json(data)
@@ -68,11 +67,15 @@ module.exports = {
           res.json({"message" : "So du khong du"})
         }
         else{
-          var newStat = true
+          var newStat = {}
+          newStat.isClosed = false
+          newStat.closedAt = ""
           if (data.Type != 1) money = data.Balance
-          if (money == data.Balance) newStat = false
-          
-          savingData.createWdrwInvoice(data.Type, money, "withdraw")
+          if (money == data.Balance) {
+            newStat.isClosed = true
+            newStat.closeAt =  new Date().toISOString().split('T')[0]
+          }
+          savingData.createWdrwInvoice(data.Type, money, data.CCCD)
 
           savingData.withdraw(req.body._id, money, newStat)
             .then((data) => {
@@ -86,8 +89,7 @@ module.exports = {
   },
 
   MonthlyReport: (req, res) => {
-    const reportDate =new Date(req.body.time + "-01")
-    savingData.Mreport(reportDate)
+    savingData.Mreport(req.body.time)
       .then((data)=>{
         res.json(data)
       })

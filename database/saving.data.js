@@ -16,10 +16,11 @@ module.exports = {
         await SAVING_DATA.insertOne(newSaving)
     },
 
-    createDepoInvoice: async(type, money) =>{
+    createDepoInvoice: async(type, money, ownBy) =>{
         const newInvoice = {}
         newInvoice.type = type
         newInvoice.money = money
+        newInvoice.ownBy = ownBy
         newInvoice.createAt = new Date().toISOString().split('T')[0]
         await DEPOINVOICE_DATA.insertOne(newInvoice)
     },
@@ -72,11 +73,22 @@ module.exports = {
     
     Mreport: async(time) => {
         const data = []
-        await SAVING_DATA.find()
-         .forEach(saving => {
-            if(new Date(saving.createAt).getMonth() == time.getMonth() && new Date(saving.createAt).getYear() == time.getYear())
-                data.push(saving)
-         })
+        for(var i = 1; i<32; i++) {
+            var create = 0, closed = 0
+            const temp = {}
+            const reportDay = time + "-" + i.toString()
+            await SAVING_DATA.find()
+            .forEach(saving => {
+                if(saving.createAt == reportDay) 
+                    create++
+                if(saving.status.closeAt == reportDay)
+                    closed++
+            })
+            temp.create = create
+            temp.closed = closed
+            temp.deviant = create - closed
+            data.push(temp)
+        }
         return data
     },
 
