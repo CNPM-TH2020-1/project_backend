@@ -31,7 +31,7 @@ app.use(session({
 }))
 
 // ROUTES
-//app.use("/user", userRoute)
+app.use("/user", userRoute)
 app.use("/saving", savingRoute)
 
 app.listen(4000, () => {
