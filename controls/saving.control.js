@@ -37,6 +37,13 @@ module.exports = {
       })
   },
 
+  getAllSaving: (req, res) =>{
+    savingData.getAll()
+     .then((data) =>{
+      res.json(data)
+    })
+  },
+
   UserDeposit: (req, res) =>{
     const money = req.body.money
     if (money < 100000){
@@ -67,23 +74,30 @@ module.exports = {
           res.json({"message" : "So du khong du"})
         }
         else{
-          var newStat = {}
-          newStat.isClosed = false
-          newStat.closedAt = ""
-          if (data.Type != 1) money = data.Balance
-          if (money == data.Balance) {
-            newStat.isClosed = true
-            newStat.closeAt =  new Date().toISOString().split('T')[0]
+          var diffDays = parseInt((new Date() - new Date(data.createAt)) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 15 ){
+            console.log(diffDays)
+            res.json({"message" : "Tai khoan chua tao du 15 ngay"})
           }
-          savingData.createWdrwInvoice(data.Type, money, data.CCCD)
+          else{
+            var newStat = {}
+            newStat.isClosed = false
+            newStat.closedAt = ""
+            if (data.Type != 1) money = data.Balance
+            if (money == data.Balance) {
+              newStat.isClosed = true
+              newStat.closeAt =  new Date().toISOString().split('T')[0]
+            }
+            savingData.createWdrwInvoice(data.Type, money, data.CCCD)
 
-          savingData.withdraw(req.body._id, money, newStat)
-            .then((data) => {
-              res.json(data)
-            })
-            .catch((err) => {
-              res.json({"message" : "So tien khong hop le."})
-            })
+            savingData.withdraw(req.body._id, money, newStat)
+              .then((data) => {
+                res.json(data)
+              })
+              .catch((err) => {
+                res.json({"message" : "So tien khong hop le."})
+              })
+          }
         }
       })
   },

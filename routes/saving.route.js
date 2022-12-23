@@ -8,5 +8,6 @@ router.patch("/deposit", savingControl.UserDeposit)
 router.patch("/withdraw", savingControl.UserWithdraw)
 router.get("/reportbyMonth", savingControl.MonthlyReport)
 router.get("/reportbyDay", savingControl.DailyReport)
+router.get("/getAll", savingControl.getAllSaving)
 
 module.exports = router

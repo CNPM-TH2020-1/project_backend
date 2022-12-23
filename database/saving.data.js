@@ -49,6 +49,12 @@ module.exports = {
         return await SAVING_DATA.findOne( { _id: ObjectID(SavingID) } )
     },
 
+    getAll: async() => {
+        const data = []
+        const res = await SAVING_DATA.find().forEach(saving => data.push(saving))
+        return data
+    },
+
     deposit: async(SavingID, depoMoney) => {
         return await SAVING_DATA.update(
             {_id: ObjectID(SavingID)},
