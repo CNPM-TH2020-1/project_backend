@@ -10,13 +10,18 @@ client.connect()
 SAVING_DATA = client.db("cnpm").collection("saving")
 DEPOINVOICE_DATA = client.db("cnpm").collection("depo_invoice")
 WDRWINVOICE_DATA = client.db("cnpm").collection("wdraw_invoice")
+STYPE_DATA = client.db("cnpm").collection("saving_type")
+
 
 module.exports = {
     createSaving: async (newSaving) => {
+        const date = new Date().toISOString().split('T')[0]
+        newSaving.createAt = date
+        newSaving.status = { "isClosed": false, "closeAt": "" }
         await SAVING_DATA.insertOne(newSaving)
     },
 
-    createDepoInvoice: async(type, money, ownBy) =>{
+    createDepoInvoice: async(type, money, ownBy) => {
         const newInvoice = {}
         newInvoice.type = type
         newInvoice.money = money
@@ -26,13 +31,20 @@ module.exports = {
     },
 
     createWdrwInvoice: async(type, money) => {
-        if(money){
-            const newInvoice = {}
-            newInvoice.type = type
-            newInvoice.money = money
-            newInvoice.createAt = new Date().toISOString().split('T')[0]
-            await WDRWINVOICE_DATA.insertOne(newInvoice)
-        }
+        const newInvoice = {}
+        newInvoice.type = type
+        newInvoice.money = money
+        newInvoice.createAt = new Date().toISOString().split('T')[0]
+        await WDRWINVOICE_DATA.insertOne(newInvoice)
+    },
+
+    createNewType: async(newType) =>{
+        newType.cnt = 0
+        await STYPE_DATA.insertOne(newType)
+    },
+
+    findTypeName: async(TypeName) =>{
+        return await STYPE_DATA.findOne( {"name" : TypeName} )
     },
 
     findSavingByCCCD: async (UserCCCD) => {
@@ -49,9 +61,15 @@ module.exports = {
         return await SAVING_DATA.findOne( { _id: ObjectID(SavingID) } )
     },
 
-    getAll: async() => {
+    SavingList: async() => {
         const data = []
         const res = await SAVING_DATA.find().forEach(saving => data.push(saving))
+        return data
+    },
+
+    TypeList: async() => {
+        const data = []
+        await STYPE_DATA.find().forEach(saving => data.push(saving))
         return data
     },
 

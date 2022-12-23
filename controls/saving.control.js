@@ -10,14 +10,15 @@ client.connect()
 
 module.exports = {
   create: (req, res) => {
-    var newSaving = req.body;
-    const date = new Date().toISOString().split('T')[0]
-    newSaving.createAt = date
-    newSaving.status = { "isClosed": false, "closeAt": "" }
-    savingData.createSaving(newSaving)
+    const newSaving = req.body
+    savingData.findTypeName(req.body.Type)
+    .then((type) => {
+      newSaving.Type = type
+      savingData.createSaving(newSaving)
       .then(() => {
         res.send("Tao so tiet kiem thanh cong.")
       })
+    })
   },
   
   getSavingByCCCD: (req, res) => {
@@ -38,61 +39,74 @@ module.exports = {
   },
 
   getAllSaving: (req, res) =>{
-    savingData.getAll()
+    savingData.SavingList()
      .then((data) =>{
       res.json(data)
     })
   },
 
+  createNewType: (req, res) =>{
+    savingData.createNewType(req.body)
+     .then(() => {
+      res.json({"message" : "Tao loai tiet kiem moi thanh cong"})
+     })
+  },
+
+  getAllType: (req, res) => {
+    savingData.TypeList()
+    .then((data) =>{
+     res.json(data)
+   })
+  },
+
   UserDeposit: (req, res) =>{
     const money = req.body.money
-    if (money < 100000){
-      res.json({"message" : "Nap toi thieu 100 000 VND"})
-    }
-    else{
-      savingData.findSavingbyID(req.body._id)
-        .then((saving) => {
-          if (saving.status){
-            savingData.createDepoInvoice(saving.Type, money, saving.CCCD)
-            savingData.deposit(req.body._id, money)
-              .then((data) => {
-                res.json(data)
-              })
-          }
-          else{
+    savingData.findSavingbyID(req.body._id)
+      .then((saving) => {
+        if (!saving.status.isClosed && money >= saving.Type.mindeposit){
+          console.log(saving)
+          savingData.createDepoInvoice(saving.Type, money, saving.CCCD)
+          savingData.deposit(req.body._id, money)
+            .then((data) => {
+              res.json(data)
+            })
+        }
+        else {
+          if (saving.status.isClosed)
             res.json( {"message" : "So dong"} )
-          }
-        })
-    }
+          if (money < saving.Type.mindeposit)
+            res.json( {"message" : "Goi toi thieu " + saving.Type.mindeposit.toString() + " VND"} )
+        }
+      })
   },
 
   UserWithdraw: (req, res) =>{
-    const money = req.body.money
+    var money = req.body.money
     savingData.findSavingbyID(req.body._id)
       .then((data)=>{
-        if (data.Type == 1 && money > data.Balance) {
+        if (money > data.Balance) {
           res.json({"message" : "So du khong du"})
         }
         else{
           var diffDays = parseInt((new Date() - new Date(data.createAt)) / (1000 * 60 * 60 * 24));
-          if (diffDays <= 15 ){
-            console.log(diffDays)
-            res.json({"message" : "Tai khoan chua tao du 15 ngay"})
+          if (diffDays <=  data.Type.mintime) {
+            res.json( {"message" : "So tiet kiem chua tao du "+ data.Type.mintime.toString() +" ngay"} )
           }
           else{
             var newStat = {}
             newStat.isClosed = false
             newStat.closedAt = ""
-            if (data.Type != 1) money = data.Balance
+            if (data.Type.maturing != 1) money = data.Balance
             if (money == data.Balance) {
               newStat.isClosed = true
               newStat.closeAt =  new Date().toISOString().split('T')[0]
             }
-            savingData.createWdrwInvoice(data.Type, money, data.CCCD)
+            
 
             savingData.withdraw(req.body._id, money, newStat)
               .then((data) => {
                 res.json(data)
+                savingData.createWdrwInvoice(data.Type, money, data.CCCD)
               })
               .catch((err) => {
                 res.json({"message" : "So tien khong hop le."})
