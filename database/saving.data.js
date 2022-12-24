@@ -1,6 +1,7 @@
 const { query } = require("express")
 const { MongoClient, Db } = require("mongodb")
 const { ObjectID } = require("bson")
+
 const config = require("../config/properties")
 
 const uri = config.DBDriver
@@ -15,9 +16,12 @@ STYPE_DATA = client.db("cnpm").collection("saving_type")
 
 module.exports = {
     createSaving: async (newSaving) => {
+        newSaving.interest = 0
         const date = new Date().toISOString().split('T')[0]
         newSaving.createAt = date
         newSaving.status = { "isClosed": false, "closeAt": "" }
+        newSaving.startMoney = newSaving.Balance
+        newSaving.count = 0
         await SAVING_DATA.insertOne(newSaving)
     },
 
@@ -39,7 +43,7 @@ module.exports = {
     },
 
     createNewType: async(newType) =>{
-        newType.cnt = 0
+
         await STYPE_DATA.insertOne(newType)
     },
 
@@ -50,7 +54,37 @@ module.exports = {
     findSavingByCCCD: async (UserCCCD) => {
         const data = []
         const res = await SAVING_DATA.find({"CCCD": UserCCCD})
-         .forEach(saving => data.push(saving))
+         .forEach(saving => {
+            var diffDays = parseInt((new Date() - new Date(saving.createAt)) / (1000 * 60 * 60 * 24))
+            if(!saving.Type.maturing){
+                if(saving.count < parseInt(diffDays/30)) {
+                    saving.count = parseInt(diffDays/30)
+                    saving.interest = saving.Balance * Math.pow(saving.Type.interestRate/100, saving.count)
+                    saving.Balance = saving.Balance + saving.interest
+                    SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
+                        {
+                            $inc: {Balance : saving.interest},
+                            $set: {interest: saving.interest, count : saving.count}
+                        })
+                }
+            }
+            else{
+                const cnt = parseInt(diffDays/(30*saving.Type.maturing))
+                const tmp = Math.round( cnt * saving.Type.maturing * saving.Type.interestRate * saving.startMoney / 100)
+                if(tmp != saving.interest){
+                    saving.interest = tmp
+                    saving.Balance = saving.interest + saving.startMoney
+                    saving.count = cnt
+                    SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
+                        {
+                            $set: {interest: saving.interest,
+                                    Balance: saving.Balance,
+                                    count : cnt}
+                        })
+                }
+            }
+            data.push(saving)
+         })
         if(!data.length) {
             throw 1;
         }
@@ -97,7 +131,7 @@ module.exports = {
     
     Mreport: async(time) => {
         const data = []
-        for(var i = 1; i<32; i++) {
+        for(var i = 1; i < 32; i++) {
             var create = 0, closed = 0
             const temp = {}
             const reportDay = time + "-" + i.toString()
@@ -108,30 +142,30 @@ module.exports = {
                 if(saving.status.closeAt == reportDay)
                     closed++
             })
+            temp.day = i
             temp.create = create
             temp.closed = closed
             temp.deviant = create - closed
-            data.push(temp)
+            if(create || closed)
+                data.push(temp)
         }
         return data
     },
 
-    Dreport: async(time) => {
+    Dreport: async(time, Type) => {
         const data = []
-        const Type = [1, 3, 6]
         for(var i = 0; i < Type.length; i++){
             const temp = {}
             var sDepo = 0, sWdraw = 0 
             await DEPOINVOICE_DATA.find()
              .forEach(invoice => {
-                console.log(invoice)
-                if (invoice.type == Type[i] && invoice.createAt == time) sDepo += invoice.money
+                if (invoice.type.name == Type[i].name && invoice.createAt == time) sDepo += invoice.money
              })
             await WDRWINVOICE_DATA.find()
              .forEach(invoice => {
-                if (invoice.type == Type[i] && invoice.createAt == time) sWdraw += invoice.money
+                if (invoice.type.name == Type[i].name && invoice.createAt == time) sWdraw += invoice.money
              })
-             temp.Type = Type[i]
+             temp.Type = Type[i].name
              temp.deposit = sDepo
              temp.withdraw = sWdraw
              temp.deviant = sDepo - sWdraw
