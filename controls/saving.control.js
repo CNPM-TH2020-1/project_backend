@@ -14,14 +14,11 @@ module.exports = {
     const newSaving = req.body;
     savingData.findTypeName(req.body.Type).then((type) => {
       newSaving.Type = type;
-      userModel.findByCCCD(req.body.CCCD).then((cccd)=>{
-        newSaving.CCCD = cccd
         savingData.createSaving(newSaving).then(() => {
           res.send("Tao so tiet kiem thanh cong.");
         });
-      })
-      
-    });
+  })   
+    ;
   },
 
   getSavingByCCCD: (req, res) => {
