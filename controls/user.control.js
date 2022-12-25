@@ -26,13 +26,19 @@ module.exports = {
     userModel.findByUsername(user.username)
       .then((data) => {
         console.log(data)
-        res.send("username exists")
+        res.json({
+          success: false,
+          reason: "username exists"
+        })
       })
       .catch(() => {
         userModel.findByCCCD(user.CCCD)
           .then((data) => {
             console.log(data)
-            res.send("CCCD exists")
+            res.json({
+              success: false,
+              reason: "CCCD exists"
+            })
           })
           .catch(() => {
             hashPassword(user.password)
@@ -45,9 +51,16 @@ module.exports = {
               })
               .then(data => {
                 console.log("return", data)
-                res.redirect("/user/login")
+                res.json({
+                  success: true
+                })
               })
-              .catch(err => console.log(err.message))
+              .catch(err => {
+                res.json({
+                  success: false,
+                  reason: err.message
+                })
+              })
           })
       })
   },
