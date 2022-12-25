@@ -40,9 +40,8 @@ app.use(
 
 // ROUTES
 app.use("/user", userRoute)
-app.use("/saving", savingRoute);
-app.use("/type",typeRoute);
-
+app.use("/saving", savingRoute)
+app.use("/type",typeRoute)
 app.listen(4000, () => {
   console.log("App listened to port 4000");
 });

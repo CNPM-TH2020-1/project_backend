@@ -31,12 +31,20 @@ module.exports = {
 
     userModel.findByUsername(user.username)
       .then((data) => {
-        res.send("username exists")
+        console.log(data)
+        res.json({
+          success: false,
+          reason: "username exists"
+        })
       })
       .catch(() => {
         userModel.findByCCCD(user.CCCD)
           .then((data) => {
-            res.send("CCCD exists")
+            console.log(data)
+            res.json({
+              success: false,
+              reason: "CCCD exists"
+            })
           })
           .catch(() => {
             hashPassword(user.password)
@@ -50,11 +58,15 @@ module.exports = {
               .then(data => {
                 console.log("return", data)
                 res.json({
-                  message:"Success"
+                  success: true
                 })
-                // res.redirect("/user/login")
               })
-              .catch(err => console.log(err.message))
+              .catch(err => {
+                res.json({
+                  success: false,
+                  reason: err.message
+                })
+              })
           })
       })
   },
@@ -67,18 +79,24 @@ module.exports = {
       return
     }
 
+    var isAdmin = false
+
     userModel.findByUsername(user.username)
-      .then(foundUser => { return checkPassword(user.password, foundUser.password_digest) })
+      .then(foundUser => {
+        console.log(foundUser)
+        isAdmin = foundUser.isAdmin
+        return checkPassword(user.password, foundUser.password_digest)
+      })
       .then(result => {
         if (result) {
           return createToken()
         } else {
-          res.end("password incorrect")
+          throw new Error("password incorrect")
         }
       })
       .then((token) => {
         req.session.token = token
-        req.session.foundUser?.isAdmin
+        req.session.isAdmin = isAdmin
         if (user.rememberme) {
           req.session.user = {
             username: user.username,
@@ -98,11 +116,16 @@ module.exports = {
           username: user.username,
         })
         console.log(data)
-        // res.redirect("/home")
+        res.json({
+          success: true
+        })
       })
       .catch(err => {
         console.log(err)
-        res.send("account does not exist")
+        res.json({
+          success: false,
+          reason: err.message
+        })
       })
   },
   logout: (req, res) => {

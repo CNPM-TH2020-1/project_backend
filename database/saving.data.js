@@ -23,11 +23,12 @@ module.exports = {
         newSaving.status = { "isClosed": false, "closeAt": "" }
         newSaving.startMoney = newSaving.Balance
         newSaving.count = 0
-        await SAVING_DATA.insertOne(newSaving)
+        return await SAVING_DATA.insertOne(newSaving)
     },
 
-    createDepoInvoice: async(type, money, ownBy) => {
+    createDepoInvoice: async(type, money, ownBy, savingID) => {
         const newInvoice = {}
+        newInvoice.savingID = savingID
         newInvoice.type = type
         newInvoice.money = money
         newInvoice.ownBy = ownBy
@@ -35,10 +36,12 @@ module.exports = {
         await DEPOINVOICE_DATA.insertOne(newInvoice)
     },
 
-    createWdrwInvoice: async(type, money) => {
+    createWdrwInvoice: async(type, money, ownBy, savingID) => {
         const newInvoice = {}
+        newInvoice.savingID = savingID
         newInvoice.type = type
         newInvoice.money = money
+        newInvoice.ownBy = ownBy
         newInvoice.createAt = new Date().toISOString().split('T')[0]
         await WDRWINVOICE_DATA.insertOne(newInvoice)
     },
@@ -56,32 +59,34 @@ module.exports = {
         const data = []
         const res = await SAVING_DATA.find({"CCCD": UserCCCD})
          .forEach(saving => {
-            var diffDays = parseInt((new Date() - new Date(saving.createAt)) / (1000 * 60 * 60 * 24))
-            if(!saving.Type.maturing){
-                if(saving.count < parseInt(diffDays/30)) {
-                    saving.count = parseInt(diffDays/30)
-                    saving.interest = saving.Balance * Math.pow(saving.Type.interestRate/100, saving.count)
-                    saving.Balance = saving.Balance + saving.interest
-                    SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
-                        {
-                            $inc: {Balance : saving.interest},
-                            $set: {interest: saving.interest, count : saving.count}
-                        })
+            if(!saving.status.isClosed) {
+                var diffDays = parseInt((new Date() - new Date(saving.createAt)) / (1000 * 60 * 60 * 24))
+                if(!saving.Type.maturing){
+                    if(saving.count < parseInt(diffDays/30)) {
+                        saving.interest = saving.Balance * Math.pow(saving.Type.interestRate/100,parseInt(diffDays/30) - saving.count)
+                        saving.count = parseInt(diffDays/30)
+                        saving.Balance = saving.Balance + saving.interest
+                        SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
+                            {
+                                $inc: {Balance : saving.interest},
+                                $set: {interest: saving.interest, count : saving.count}
+                            })
+                    }
                 }
-            }
-            else{
-                const cnt = parseInt(diffDays/(30*saving.Type.maturing))
-                const tmp = Math.round( cnt * saving.Type.maturing * saving.Type.interestRate * saving.startMoney / 100)
-                if(tmp != saving.interest){
-                    saving.interest = tmp
-                    saving.Balance = saving.interest + saving.startMoney
-                    saving.count = cnt
-                    SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
-                        {
-                            $set: {interest: saving.interest,
-                                    Balance: saving.Balance,
-                                    count : cnt}
-                        })
+                else{
+                    const cnt = parseInt(diffDays/(30*saving.Type.maturing))
+                    const tmp = Math.round( cnt * saving.Type.maturing * saving.Type.interestRate * saving.startMoney / 100)
+                    if(tmp != saving.interest){
+                        saving.interest = tmp
+                        saving.Balance = saving.interest + saving.startMoney
+                        saving.count = cnt
+                        SAVING_DATA.updateOne({_id : ObjectID(saving._id)},
+                            {
+                                $set: {interest: saving.interest,
+                                        Balance: saving.Balance,
+                                        count : cnt}
+                            })
+                    }
                 }
             }
             data.push(saving)
