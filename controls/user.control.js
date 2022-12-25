@@ -60,8 +60,14 @@ module.exports = {
       return
     }
 
+    var isAdmin = false
+
     userModel.findByUsername(user.username)
-      .then(foundUser => { return checkPassword(user.password, foundUser.password_digest) })
+      .then(foundUser => { 
+        console.log(foundUser)
+        isAdmin = foundUser.isAdmin
+        return checkPassword(user.password, foundUser.password_digest) 
+      })
       .then(result => {
         if (result) {
           return createToken()
@@ -71,7 +77,7 @@ module.exports = {
       })
       .then((token) => {
         req.session.token = token
-        req.session.foundUser.isAdmin
+        req.session.isAdmin = isAdmin
         if (user.rememberme) {
           req.session.user = {
             username: user.username,

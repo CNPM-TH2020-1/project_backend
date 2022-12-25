@@ -1,7 +1,6 @@
 const {MongoClient} = require("mongodb")
 const {join: joinPath} = require('path');
 const fs = require("fs")
-const connectStr = require("../configs/connectStr")
 
 var config = {
   PORT : 4000,
