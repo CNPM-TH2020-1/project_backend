@@ -63,16 +63,16 @@ module.exports = {
     var isAdmin = false
 
     userModel.findByUsername(user.username)
-      .then(foundUser => { 
+      .then(foundUser => {
         console.log(foundUser)
         isAdmin = foundUser.isAdmin
-        return checkPassword(user.password, foundUser.password_digest) 
+        return checkPassword(user.password, foundUser.password_digest)
       })
       .then(result => {
         if (result) {
           return createToken()
         } else {
-          res.end("password incorrect")
+          throw new Error("password incorrect")
         }
       })
       .then((token) => {
@@ -100,8 +100,8 @@ module.exports = {
       .catch(err => {
         console.log(err)
         res.json({
-          success: false, 
-          reason: "something went wrong"
+          success: false,
+          reason: err.message
         })
       })
   },
