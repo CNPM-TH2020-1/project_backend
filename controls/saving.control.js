@@ -14,6 +14,7 @@ module.exports = {
     savingData.findTypeName(req.body.Type)
     .then((type) => {
       newSaving.Type = type
+      savingData.createDepoInvoice(newSaving.Type, req.body.Balance, req.body.CCCD)
       savingData.createSaving(newSaving)
       .then(() => {
         res.send("Tao so tiet kiem thanh cong.")
@@ -74,7 +75,7 @@ module.exports = {
           if (saving.status.isClosed)
             res.json( {"message" : "So dong"} )
           if (money < saving.Type.minDeposit)
-            res.json( {"message" : "Goi toi thieu " + saving.Type.mindeposit.toString() + " VND"} )
+            res.json( {"message" : "Goi toi thieu " + saving.Type.minDeposit.toString() + " VND"} )
         }
       })
   },
@@ -88,14 +89,14 @@ module.exports = {
         }
         else{
           var diffDays = parseInt((new Date() - new Date(saving.createAt)) / (1000 * 60 * 60 * 24));
-          if (diffDays <=  saving.Type.mintime) {
-            res.json( {"message" : "So tiet kiem chua tao du "+ saving.Type.mintime.toString() +" ngay"} )
+          if (diffDays <=  saving.Type.minTime) {
+            res.json( {"message" : "So tiet kiem chua tao du "+ saving.Type.minTime.toString() +" ngay"} )
           }
           else{
             var newStat = {}
             newStat.isClosed = false
             newStat.closedAt = ""
-            if (saving.Type.maturing) money = data.Balance
+            if (saving.Type.maturing) money = saving.Balance
             if (money == saving.Balance) {
               newStat.isClosed = true
               newStat.closeAt =  new Date().toISOString().split('T')[0]
