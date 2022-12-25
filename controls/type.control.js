@@ -23,5 +23,18 @@ module.exports = {
         res.json({
             data
         })
+    },
+    updateType: async(req,res)=>{
+        console.log("TEST ASBCZR: ",req.body)
+        const data = await typeData.update(req,res)
+        res.json({
+            data
+        })
+    },
+    updateMinDeposit: async(req,res) =>{
+        const data = await typeData.updateMindps(req,res)
+        res.json({
+            data
+        })
     }
 }

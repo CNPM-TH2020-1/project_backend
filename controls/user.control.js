@@ -31,13 +31,11 @@ module.exports = {
 
     userModel.findByUsername(user.username)
       .then((data) => {
-        console.log(data)
         res.send("username exists")
       })
       .catch(() => {
         userModel.findByCCCD(user.CCCD)
           .then((data) => {
-            console.log(data)
             res.send("CCCD exists")
           })
           .catch(() => {
@@ -80,7 +78,7 @@ module.exports = {
       })
       .then((token) => {
         req.session.token = token
-        req.session.foundUser.isAdmin
+        req.session.foundUser?.isAdmin
         if (user.rememberme) {
           req.session.user = {
             username: user.username,
@@ -95,8 +93,12 @@ module.exports = {
         return userModel.updateUserToken(token, user)
       })
       .then((data) => {
+        res.send({
+          success:true,
+          username: user.username,
+        })
         console.log(data)
-        res.redirect("/home")
+        // res.redirect("/home")
       })
       .catch(err => {
         console.log(err)

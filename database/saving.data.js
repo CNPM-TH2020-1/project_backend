@@ -132,83 +132,84 @@ module.exports = {
     
     Mreport: async(time) => {
         const data = []
-        // for(var i = 1; i < 32; i++) {
-        //     var create = 0, closed = 0
-        //     const temp = {}
-        //     const reportDay = time + "-" + i.toString()
-        //     await SAVING_DATA.find()
-        //     .forEach(saving => {
-        //         temp.type = saving.Type
-        //         if(saving.createAt == reportDay) 
-        //             create++
-        //         if(saving.status.closeAt == reportDay)
-        //             closed++
-        //     })
+        for(var i = 1; i < 32; i++) {
+            var create = 0, closed = 0
+            const temp = {}
+            const reportDay = time + "-" + i.toString()
+            await SAVING_DATA.find()
+            .forEach(saving => {
+                temp.type = saving.Type
+                if(saving.createAt == reportDay) 
+                    create++
+                if(saving.status.closeAt == reportDay)
+                    closed++
+            })
 
-        //     temp.day = i
-        //     temp.create = create
-        //     temp.closed = closed
-        //     temp.deviant = create - closed
-        //     if(create || closed)
-        //         data.push(temp)
-        // }
-
+            temp.day = i
+            temp.create = create
+            temp.closed = closed
+            temp.deviant = create - closed
+            if(create || closed)
+                data.push(temp)
+        }
+        return data
         // let month =[];
         // let create = 0;
         // let close = 0;
-        let obj = []
-        let tmp = []
-        const res = await SAVING_DATA.find().forEach(saving =>tmp.push(saving))
-        const types = await typeHelper.findType()
-        types.forEach(type=>{
-            let _tmp = {}
-            let data = []
-            _tmp.type = type
 
-            tmp.forEach((sv)=>{
-                let tmp2 = {}
-               if (sv.Type.name == type){
-                    tmp2.date = sv.createAt
-                    tmp2.open = 0
-                    tmp2.close = 0
-                    tmp2.deviant = 0
-                    data.push(tmp2)
-               } 
+        // let obj = []
+        // let tmp = []
+        // const res = await SAVING_DATA.find().forEach(saving =>tmp.push(saving))
+        // const types = await typeHelper.findType()
+        // types.forEach(type=>{
+        //     let _tmp = {}
+        //     let data = []
+        //     _tmp.type = type
+
+        //     tmp.forEach((sv)=>{
+        //         let tmp2 = {}
+        //        if (sv.Type.name == type){
+        //             tmp2.date = sv.createAt
+        //             tmp2.open = 0
+        //             tmp2.close = 0
+        //             tmp2.deviant = 0
+        //             data.push(tmp2)
+        //        } 
                
-            })
-            // _tmp.open = 0
-            // _tmp.close = 0
-            // _tmp.deviant = 0
-            _tmp.data =data
-            obj.push(_tmp)
-        })
-        console.log(obj)
-        for (var i=0;i<tmp.length;i++){
-            month = tmp[i].createAt.split("-")
+        //     })
+        //     // _tmp.open = 0
+        //     // _tmp.close = 0
+        //     // _tmp.deviant = 0
+        //     _tmp.data =data
+        //     obj.push(_tmp)
+        // })
+        // console.log(obj)
+        // for (var i=0;i<tmp.length;i++){
+        //     month = tmp[i].createAt.split("-")
             
-            const tm = month[0]+"-"+month[1]
+        //     const tm = month[0]+"-"+month[1]
 
-            let create = 0;
-            let close = 0;
-            for (var j=0;j<obj.length;j++){
-                console.log(tmp[i].Type.name,tmp[i].createAt,tmp[i].status.isClosed,obj[j])
-                        // let month =[];
+        //     let create = 0;
+        //     let close = 0;
+        //     for (var j=0;j<obj.length;j++){
+        //         console.log(tmp[i].Type.name,tmp[i].createAt,tmp[i].status.isClosed,obj[j])
+        //                 // let month =[];
 
-                for (var k=0;k<obj[j].data.length;k++){
-                    if (tm==time && tmp[i].Type.name==obj[j].type && tmp[i].status.isClosed ==false && tmp[i].createAt==obj[j].data[k].date){
-                        obj[j].data[k].open++;
-                    }
-                    else if (tm==time && tmp[i].Type.name==obj[j].type && tmp[i].status.isClosed ==true ){
-                        obj[j].data[k].close++;
-                    }
+        //         for (var k=0;k<obj[j].data.length;k++){
+        //             if (tm==time && tmp[i].Type.name==obj[j].type && tmp[i].status.isClosed ==false && tmp[i].createAt==obj[j].data[k].date){
+        //                 obj[j].data[k].open++;
+        //             }
+        //             else if (tm==time && tmp[i].Type.name==obj[j].type && tmp[i].status.isClosed ==true ){
+        //                 obj[j].data[k].close++;
+        //             }
     
-                    obj[j].data[k].deviant = obj[j].data[k].open - obj[j].data[k].close
-                }
+        //             obj[j].data[k].deviant = obj[j].data[k].open - obj[j].data[k].close
+        //         }
 
-            }
-        }
+        //     }
+        // }
 
-        return obj
+        // return obj
     },
 
     Dreport: async(time, Type) => {
@@ -218,11 +219,11 @@ module.exports = {
             var sDepo = 0, sWdraw = 0 
             await DEPOINVOICE_DATA.find()
              .forEach(invoice => {
-                if (invoice.type.name == Type[i].name && invoice.createAt == time) sDepo += invoice.money
+                if (invoice?.type?.name == Type[i].name && invoice.createAt == time) sDepo += invoice.money
              })
             await WDRWINVOICE_DATA.find()
              .forEach(invoice => {
-                if (invoice.type.name == Type[i].name && invoice.createAt == time) sWdraw += invoice.money
+                if (invoice?.type?.name == Type[i].name && invoice.createAt == time) sWdraw += invoice.money
              })
              temp.Type = Type[i].name
              temp.deposit = sDepo
