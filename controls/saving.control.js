@@ -3,6 +3,7 @@ const { query } = require("express");
 const { MongoClient, Db } = require("mongodb");
 const config = require("../config/properties");
 const savingData = require("../database/saving.data");
+const userModel = require("../models/user.model")
 
 const uri = config.DBDriver;
 const client = new MongoClient(uri);
@@ -13,9 +14,13 @@ module.exports = {
     const newSaving = req.body;
     savingData.findTypeName(req.body.Type).then((type) => {
       newSaving.Type = type;
-      savingData.createSaving(newSaving).then(() => {
-        res.send("Tao so tiet kiem thanh cong.");
-      });
+      userModel.findByCCCD(req.body.CCCD).then((cccd)=>{
+        newSaving.CCCD = cccd
+        savingData.createSaving(newSaving).then(() => {
+          res.send("Tao so tiet kiem thanh cong.");
+        });
+      })
+      
     });
   },
 

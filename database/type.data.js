@@ -20,5 +20,17 @@ module.exports = {
         const data = []
         await SAVING_TYPE.find().forEach(type=>data.push(type.name))
         return data
+    },
+    create: async (req,res)=>{
+        const data = req.body
+        const newType = {      
+            name: data.Name,
+            maturing: data.Duration,
+            interestRate: data.Interest,
+            minTime: data.Min,
+            minDeposit:100000
+        }
+        const response = await SAVING_TYPE.insertOne(newType)
+        return response
     }
 }

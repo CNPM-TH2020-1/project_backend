@@ -19,6 +19,7 @@ module.exports = {
     }
   },
   findByCCCD: async (CCCD) => {
+    console.log("CCCD: ",CCCD)
     var res = await userdb.findOne({ CCCD });
     if (res === null) {
       throw "tuyendeptrai";

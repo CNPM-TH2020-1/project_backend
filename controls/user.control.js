@@ -51,7 +51,10 @@ module.exports = {
               })
               .then(data => {
                 console.log("return", data)
-                res.redirect("/user/login")
+                res.json({
+                  message:"Success"
+                })
+                // res.redirect("/user/login")
               })
               .catch(err => console.log(err.message))
           })

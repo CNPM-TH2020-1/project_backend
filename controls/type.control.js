@@ -18,4 +18,10 @@ module.exports = {
             data
         })
     },
+    createType:async (req,res)=>{
+        const data = await typeData.create(req,res)
+        res.json({
+            data
+        })
+    }
 }
