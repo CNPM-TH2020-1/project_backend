@@ -22,11 +22,12 @@ module.exports = {
         newSaving.status = { "isClosed": false, "closeAt": "" }
         newSaving.startMoney = newSaving.Balance
         newSaving.count = 0
-        await SAVING_DATA.insertOne(newSaving)
+        return await SAVING_DATA.insertOne(newSaving)
     },
 
-    createDepoInvoice: async(type, money, ownBy) => {
+    createDepoInvoice: async(type, money, ownBy, savingID) => {
         const newInvoice = {}
+        newInvoice.savingID = savingID
         newInvoice.type = type
         newInvoice.money = money
         newInvoice.ownBy = ownBy
@@ -34,10 +35,12 @@ module.exports = {
         await DEPOINVOICE_DATA.insertOne(newInvoice)
     },
 
-    createWdrwInvoice: async(type, money) => {
+    createWdrwInvoice: async(type, money, ownBy, savingID) => {
         const newInvoice = {}
+        newInvoice.savingID = savingID
         newInvoice.type = type
         newInvoice.money = money
+        newInvoice.ownBy = ownBy
         newInvoice.createAt = new Date().toISOString().split('T')[0]
         await WDRWINVOICE_DATA.insertOne(newInvoice)
     },

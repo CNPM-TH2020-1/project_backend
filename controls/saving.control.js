@@ -14,10 +14,10 @@ module.exports = {
     savingData.findTypeName(req.body.Type)
     .then((type) => {
       newSaving.Type = type
-      savingData.createDepoInvoice(newSaving.Type, req.body.Balance, req.body.CCCD)
       savingData.createSaving(newSaving)
-      .then(() => {
+      .then((saving) => {
         res.send("Tao so tiet kiem thanh cong.")
+        savingData.createDepoInvoice(saving.Type, saving.Balance, saving.CCCD, saving._id)
       })
     })
   },
@@ -65,10 +65,10 @@ module.exports = {
     savingData.findSavingbyID(req.body._id)
       .then((saving) => {
         if (!saving.status.isClosed && money >= saving.Type.minDeposit){
-          savingData.createDepoInvoice(saving.Type, money, saving.CCCD)
+          savingData.createDepoInvoice(saving.Type, money, saving.CCCD, req.body._id)
           savingData.deposit(req.body._id, money)
-            .then((data) => {
-              res.json(data)
+            .then(() => {
+              res.json({"message" : "Goi tien thanh cong"})
             })
         }
         else {
@@ -104,8 +104,8 @@ module.exports = {
 
             savingData.withdraw(req.body._id, money, newStat)
               .then((data) => {
-                res.json(data)
-                savingData.createWdrwInvoice(saving.Type, money, data.CCCD)
+                res.json( {"message": "Rut tien thanh cong"} )
+                savingData.createWdrwInvoice(saving.Type, money, saving.CCCD, saving._id)
               })
               .catch((err) => {
                 res.json({"message" : "So tien khong hop le."})
