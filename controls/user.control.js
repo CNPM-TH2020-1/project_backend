@@ -100,7 +100,7 @@ module.exports = {
       .catch(err => {
         console.log(err)
         res.json({
-          success: true, 
+          success: false, 
           reason: "something went wrong"
         })
       })
