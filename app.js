@@ -5,7 +5,6 @@ const userRoute = require("./routes/user.route")
 const session = require("express-session")
 const savingRoute = require("./routes/saving.route")
 const auth = require("./middlewares/authorization")
-const session = require("express-session")
 
 // config view
 app.engine("hbs", engine({

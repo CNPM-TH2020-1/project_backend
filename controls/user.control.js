@@ -93,11 +93,16 @@ module.exports = {
       })
       .then((data) => {
         console.log(data)
-        res.redirect("/home")
+        res.json({
+          success: true
+        })
       })
       .catch(err => {
         console.log(err)
-        res.send("account does not exist")
+        res.json({
+          success: true, 
+          reason: "something went wrong"
+        })
       })
   },
   logout: (req, res) => {
