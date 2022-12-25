@@ -2,6 +2,11 @@ const db = require("../db/db");
 const userdb = db.db.collection("Users");
 
 module.exports = {
+  findAll: async ()=>{
+    const data=[]
+    await userdb.find().forEach(usr => data.push(usr))
+    return data
+  },
   createUser: async (newUser) => {
     return await userdb.insertOne(newUser);
   },

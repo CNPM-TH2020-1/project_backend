@@ -2,6 +2,7 @@ const userControl = require("../controls/user.control");
 var router = require("express").Router();
 const auth = require("../middlewares/authorization")
 
+router.get("/getUsers",userControl.getAllUsers)
 router.get("/signup", auth.checkAuthorized, userControl.signup);
 router.post("/create", auth.checkAuthorized, userControl.create)
 router.get("/login", auth.checkAuthorized, userControl.login);

@@ -4,6 +4,12 @@ const crypto = require("crypto")
 const { rmSync } = require("fs")
 
 module.exports = {
+  getAllUsers: async (req, res) => {
+    const data = await userModel.findAll()
+    res.json({
+      users: data
+    })
+  },
   signup: (req, res) => {
     res.render("signup")
   },
