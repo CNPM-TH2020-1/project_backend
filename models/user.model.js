@@ -1,62 +1,63 @@
-const db = require("../db/db")
-const userdb = db.db.collection("Users")
+const db = require("../db/db");
+const userdb = db.db.collection("Users");
 
 module.exports = {
   createUser: async (newUser) => {
-    return await userdb.insertOne(newUser)
+    return await userdb.insertOne(newUser);
   },
   findByUsername: async (username) => {
-    var res = await userdb.findOne({ username })
+    var res = await userdb.findOne({ username });
     if (res === null) {
-      throw "tuyendeptrai"
+      throw "tuyendeptrai";
     } else {
-      return res
+      return res;
     }
   },
   findByCCCD: async (CCCD) => {
-    var res = await userdb.findOne({ CCCD })
+    var res = await userdb.findOne({ CCCD });
     if (res === null) {
-      throw "tuyendeptrai"
+      throw "tuyendeptrai";
     } else {
-      return res
+      return res;
     }
   },
   updateUser: async (newUser, oldUser) => {
     var filter = {
-      username: oldUser.username
-    }
+      username: oldUser.username,
+    };
     var query = {
-      $set: newUser
-    }
-    var res = await userdb.updateOne(filter, query)
+      $set: newUser,
+    };
+    var res = await userdb.updateOne(filter, query);
     if (res === null) {
-      throw "tuyendeptrai"
+      throw "tuyendeptrai";
     } else {
-      return res
+      return res;
     }
   },
   updateUserToken: async (token, user) => {
     var filter = {
-      username: user.username
-    }
+      username: user.username,
+    };
     var query = {
       $set: {
-        token: token
-      }
-    }
-    var res = await userdb.updateOne(filter, query)
+        token: token,
+      },
+    };
+    var res = await userdb.updateOne(filter, query);
     if (res === null) {
-      throw "tuyendeptrai"
+      throw "tuyendeptrai";
     } else {
-      return res
+      return res;
     }
   },
   checkAdmin: async (user) => {
-    var res = await userdb.findOne({ username:user.username })
+    var res = await userdb.findOne({ username: user.username });
     if (res === null) {
-      throw "tuyendeptrai"
+      throw "tuyendeptrai";
     } else {
-      return res.isAdmin
+      return res.isAdmin;
     }
-  }
-}
+  },
+};
+
